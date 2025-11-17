@@ -1,73 +1,58 @@
-# terraform/main.tf
-
-variable "kong_admin_url" {
-  type        = string
-  description = "Kong Admin API URL"
-}
-
-variable "kong_admin_token" {
-  type        = string
-  sensitive   = true
-  description = "Kong Admin API Token"
-}
-
-variable "keycloak_url" {
-  type        = string
-  description = "Keycloak server URL"
-}
-
-variable "keycloak_client_secret" {
-  type        = string
-  sensitive   = true
-  description = "Keycloak client secret"
-}
-
-# Docker deployment for your admin service
-resource "docker_image" "kong_admin_service" {
-  name = "your-org/kong-admin-service:latest"
-  keep_locally = false
-}
-
-resource "docker_container" "kong_admin_service" {
-  name  = "kong-admin-service"
-  image = docker_image.kong_admin_service.name
-  
-  env = [
-    "KONG_ADMIN_URL=${var.kong_admin_url}",
-    "KONG_ADMIN_TOKEN=${var.kong_admin_token}",
-    "KEYCLOAK_URL=${var.keycloak_url}",
-    "KEYCLOAK_CLIENT_SECRET=${var.keycloak_client_secret}",
-    "NODE_ENV=production"
-  ]
-  
-  ports {
-    internal = 3000
-    external = 3000
+terraform {
+  required_providers {
+    konnect = {
+      source  = "kong/konnect"
+      version = "~> 0.3.0"
+    }
   }
 }
 
-# Kong route to expose your admin service
-resource "kong_service" "admin_service" {
-  name     = "kong-admin-service"
-  protocol = "http"
-  host     = "kong-admin-service"
-  port     = 3000
+provider "konnect" {
+  personal_access_token = var.kong_pat_token  # Changed from 'pat' to 'personal_access_token'
 }
 
-resource "kong_route" "admin_service_route" {
-  service_id = kong_service.admin_service.id
-  paths      = ["/admin-api/"]
+# Import existing service
+resource "konnect_gateway_service" "railway_service" {
+  control_plane_id = "4dc61f55-0503-4d7c-a8cb-a1d924ae0bfc"
+  name             = "railway-service"
+  protocol         = "https"
+  host             = "kong-portal-backend-production.up.railway.app"
+  port             = 443
+  path             = "/"
+  read_timeout     = 60000
+  write_timeout    = 60000
+  connect_timeout  = 60000
+  retries          = 5
+  enabled          = true
+}
+
+# Import existing health route
+resource "konnect_gateway_route" "health" {
+  control_plane_id = "4dc61f55-0503-4d7c-a8cb-a1d924ae0bfc"
+  name             = "health"
+  paths            = ["/health"]
+  protocols        = ["http", "https"]
+  strip_path       = false
+  preserve_host    = false
+  request_buffering  = true
+  response_buffering = true
+  https_redirect_status_code = 426
   
+  service = {
+    id = konnect_gateway_service.railway_service.id
+  }
+}
+
+# Add your other routes
+resource "konnect_gateway_route" "users" {
+  control_plane_id = "4dc61f55-0503-4d7c-a8cb-a1d924ae0bfc"
+  name       = "users-route"
+  paths      = ["/api/users"]
+  protocols  = ["http", "https"]
   strip_path = false
-}
-
-# Plugin to secure your admin service
-resource "kong_plugin" "admin_service_auth" {
-  service_id = kong_service.admin_service.id
-  name       = "key-auth"
+  preserve_host = false
   
-  config = {
-    key_names = ["x-api-key"]
-    hide_credentials = true
+  service = {
+    id = konnect_gateway_service.railway_service.id
   }
 }

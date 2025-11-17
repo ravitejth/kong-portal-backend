@@ -1,0 +1,1 @@
+kong_pat_token = "kpat_vY84RGMFc8CxBWJ2joGja2O62RA0Sj4LB2gYALcWTIDABP2pa"

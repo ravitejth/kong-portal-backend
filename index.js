@@ -112,10 +112,6 @@ async function getAdminToken() {
     try {
       const res = await axios.post(url, params.toString(), {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        // Add proxy headers if needed
-        httpsAgent: new https.Agent({
-          rejectUnauthorized: false, // Temporary for testing
-        }),
         timeout: 15000,
       });
       return res.data.access_token;
