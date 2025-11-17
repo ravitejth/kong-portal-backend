@@ -277,6 +277,10 @@ async function kcRequest(method, path, data, token, opts = {}) {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        // Add proxy headers if needed
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false // Temporary for testing
+        }),
         timeout: 15000,
         ...opts,
       });
