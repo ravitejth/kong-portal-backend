@@ -1,0 +1,77 @@
+{
+  "name": "admin-service",
+  "version": "1.0.0",
+  "description": "Kong upstream admin service for Keycloak user and client management",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "dev:debug": "nodemon --inspect index.js",
+    "dev:inspect-brk": "nodemon --inspect-brk index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build": "npm run lint && npm run test",
+    "prestart": "npm run build",
+    "docker:build": "docker build -t admin-service .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env admin-service",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "clean": "rm -rf node_modules coverage dist",
+    "clean:install": "npm run clean && npm install",
+    "deps:check": "npx npm-check-updates",
+    "deps:update": "npx npm-check-updates -u"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "body-parser": "^1.20.3",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^8.0.0",
+    "jose": "^5.9.3",
+    "morgan": "^1.10.0",
+    "pg": "^8.12.0",
+    "winston": "^3.15.0"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.7.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.16.5",
+    "@types/pg": "^8.11.8",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^25.0.0",
+    "nodemon": "^3.1.7",
+    "npm-check-updates": "^17.1.0",
+    "prettier": "^3.3.3",
+    "supertest": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "kong",
+    "keycloak",
+    "admin",
+    "express",
+    "api"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "your-repository-url"
+  }
+}
