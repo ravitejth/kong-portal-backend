@@ -47,6 +47,7 @@ const ISSUER = OIDC_ISSUER || `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}`;
 const JWKS = createRemoteJWKSet(new URL(`${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs`));
 
 console.log('ENV ::: ', ADMIN_DB_HOST, ADMIN_DB_PORT, KEYCLOAK_BASE_URL, KONG_ADMIN_URL);
+console.log('Railway ENV ::: ', process.env.ADMIN_DB_HOST ? 'Set' : 'Not set');
 
 const app = express();
 app.use(express.json()); // Parse application/json
