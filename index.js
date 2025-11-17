@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
@@ -10,20 +12,20 @@ const fs = require('fs');
 const { createRemoteJWKSet, jwtVerify } = require('jose');
 
 const app = express();
- // JSON body parsing for JSON requests; allow other requests (GET/HEAD/OPTIONS/static) to pass
-app.use(express.json({ type: ['application/json', 'application/*+json'] }));
+app.use(express.json()); // Parse application/json
+app.use(express.urlencoded({ extended: true })); // Parse application/x-www-form-urlencoded
 
 // Enforce application/json only for methods that are expected to have a body
-app.use((req, res, next) => {
-  const method = String(req.method || '').toUpperCase();
-  if (['POST', 'PUT', 'PATCH'].includes(method)) {
-    const ct = String(req.headers['content-type'] || '').toLowerCase();
-    if (!ct.includes('application/json')) {
-      return res.status(415).json({ error: 'Only application/json is supported for this endpoint' });
-    }
-  }
-  next();
-});
+// app.use((req, res, next) => {
+//   const method = String(req.method || '').toUpperCase();
+//   if (['POST', 'PUT', 'PATCH'].includes(method)) {
+//     const ct = String(req.headers['content-type'] || '').toLowerCase();
+//     if (!ct.includes('application/json')) {
+//       return res.status(415).json({ error: 'Only application/json is supported for this endpoint' });
+//     }
+//   }
+//   next();
+// });
 
 
 app.use(cors());
@@ -32,11 +34,11 @@ app.use(cors());
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
 const {
-  PORT = 3001,
-  KEYCLOAK_BASE_URL = 'http://keycloak:8080',
+  PORT = 3002,
+  KEYCLOAK_BASE_URL = 'http://localhost:18000/keycloak',
   KEYCLOAK_ADMIN_USER = 'admin',
   KEYCLOAK_ADMIN_PASSWORD = 'admin',
-  KEYCLOAK_REALM = 'tekesign',
+  KEYCLOAK_REALM = 'telesign',
 } = process.env;
 
 const {
@@ -45,7 +47,7 @@ const {
   ADMIN_DB_USER = 'admin',
   ADMIN_DB_PASSWORD = 'admin',
   ADMIN_DB_DATABASE = 'admin',
-  KONG_ADMIN_URL = 'http://kong:8001',
+  KONG_ADMIN_URL = 'http://localhost:8001',
   NETAWARE_ENC_KEY
 } = process.env;
 
