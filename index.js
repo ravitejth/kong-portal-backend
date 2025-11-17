@@ -764,6 +764,7 @@ app.post('/api/users', async (req, res) => {
       }
     } catch (_e) {
       // ignore and fallback to request data
+          console.log('_e: ', _e);
     }
 
     // Prefer human user if service-account was selected due to fuzzy search
@@ -837,6 +838,7 @@ app.post('/api/users', async (req, res) => {
   } catch (err) {
     const status = err.response?.status || 500;
     const data = err.response?.data || { error: err.message };
+    console.log('err: ', err);
     return res.status(status).json(data);
   }
 });
