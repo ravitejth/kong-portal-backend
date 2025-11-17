@@ -1077,13 +1077,13 @@ app.post('/api/netaware/provision', async (req, res) => {
         ...(apiKey ? { 'x-api-key': apiKey } : {}),
         ...(headers || {}),
       };
-      const agent = /^https:/i.test(url) && inst.insecure_tls === true ? new https.Agent({ rejectUnauthorized: false }) : undefined;
+      // const agent = /^https:/i.test(url) && inst.insecure_tls === true ? new https.Agent({ rejectUnauthorized: false }) : undefined;
       try {
         console.log(`Forwarding provisioning request to ${url} for phoneNumber ${phoneNumber}`);
         const resp = await axios.post(url, payload || {}, {
           headers: fwdHeaders,
           timeout: Number.isFinite(inst.timeout_ms) && inst.timeout_ms > 0 ? inst.timeout_ms : 15000,
-          ...(agent ? { httpsAgent: agent } : {}),
+          // ...(agent ? { httpsAgent: agent } : {}),
         });
         return res.status(200).json({
           ...resolved,
