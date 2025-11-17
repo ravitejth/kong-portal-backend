@@ -11,29 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const { createRemoteJWKSet, jwtVerify } = require('jose');
 
-const app = express();
-app.use(express.json()); // Parse application/json
-app.use(express.urlencoded({ extended: true })); // Parse application/x-www-form-urlencoded
-
-// Enforce application/json only for methods that are expected to have a body
-// app.use((req, res, next) => {
-//   const method = String(req.method || '').toUpperCase();
-//   if (['POST', 'PUT', 'PATCH'].includes(method)) {
-//     const ct = String(req.headers['content-type'] || '').toLowerCase();
-//     if (!ct.includes('application/json')) {
-//       return res.status(415).json({ error: 'Only application/json is supported for this endpoint' });
-//     }
-//   }
-//   next();
-// });
-
-
-app.use(cors());
-
-// Serve static assets for portal and OpenAPI specs from ./public
-app.use('/static', express.static(path.join(__dirname, 'public')));
-
-const {
+var {
   PORT = 3002,
   KEYCLOAK_BASE_URL = 'http://localhost:18000/keycloak',
   KEYCLOAK_ADMIN_USER = 'admin',
@@ -41,7 +19,7 @@ const {
   KEYCLOAK_REALM = 'telesign',
 } = process.env;
 
-const {
+var {
   ADMIN_DB_HOST = 'admin-db',
   ADMIN_DB_PORT = '5432',
   ADMIN_DB_USER = 'admin',
@@ -67,6 +45,29 @@ const {
 // OIDC / JWKS for Keycloak access token validation
 const ISSUER = OIDC_ISSUER || `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}`;
 const JWKS = createRemoteJWKSet(new URL(`${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs`));
+
+console.log('ENV ::: ', ADMIN_DB_HOST, ADMIN_DB_PORT, KEYCLOAK_BASE_URL, KONG_ADMIN_URL);
+
+const app = express();
+app.use(express.json()); // Parse application/json
+app.use(express.urlencoded({ extended: true })); // Parse application/x-www-form-urlencoded
+
+// Enforce application/json only for methods that are expected to have a body
+// app.use((req, res, next) => {
+//   const method = String(req.method || '').toUpperCase();
+//   if (['POST', 'PUT', 'PATCH'].includes(method)) {
+//     const ct = String(req.headers['content-type'] || '').toLowerCase();
+//     if (!ct.includes('application/json')) {
+//       return res.status(415).json({ error: 'Only application/json is supported for this endpoint' });
+//     }
+//   }
+//   next();
+// });
+
+app.use(cors());
+
+// Serve static assets for portal and OpenAPI specs from ./public
+app.use('/static', express.static(path.join(__dirname, 'public')));
 
 // Verify Bearer token from Authorization header using Keycloak JWKS
 async function verifyAccessToken(authHeader) {
@@ -388,8 +389,11 @@ async function ensureDb() {
 }
 
 ensureDb()
-  .then(() => { console.log('DB ready'); startKcRetryWorker(); })
-  .catch((e) => console.error('DB init failed:', e));
+  .then(() => {
+    console.log('DB ready');
+    startKcRetryWorker();
+  })
+  .catch(e => console.error('DB init failed:', e, ADMIN_DB_HOST));
 
 async function kongRequest(method, path, data, opts = {}) {
   const url = `${KONG_ADMIN_URL}${path}`;
